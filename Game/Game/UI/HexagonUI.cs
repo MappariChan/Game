@@ -21,7 +21,7 @@ namespace Game.UI
         public HexagonUI(Panel container, int x, int y, int width, int height, Image SurfaceImage) {
             Section = new Panel();
 
-            Section.Click += Field.SectionClick;
+            Section.Click += (sender, e) => { Field.SectionClick(sender, e); };
 
             Section.Size = new Size(width, height);
             Section.Location = new Point(x, y);
@@ -51,7 +51,7 @@ namespace Game.UI
             PictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
             PictureBox.BackColor = System.Drawing.Color.LightBlue;
 
-            PictureBox.Click += Field.SectionClick;
+            PictureBox.Click += (sender, e) => { Field.SectionClick(sender, e); };
 
             int picHeight = PictureBox.Height;
             int picWidth = PictureBox.Width;

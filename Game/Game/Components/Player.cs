@@ -48,15 +48,15 @@ namespace Game.Components
 
         public bool HaveEnoughResourceToBuild()
         {
-            return Resources.Resources[ResourceType.Stone] >= 50 && Resources.Resources[ResourceType.Wood] >= 25 && Resources.Resources[ResourceType.Sand] >= 15;
+            return Resources.Resources[ResourceType.Stone] >= 20 && Resources.Resources[ResourceType.Wood] >= 20 && Resources.Resources[ResourceType.Sand] >= 20;
         }
 
         public void ChooseSectionToBuild(Hexagon section)
         {
             section.Building = new Building(section);
-            Resources.Resources[ResourceType.Stone] -= 50;
-            Resources.Resources[ResourceType.Wood] -= 25;
-            Resources.Resources[ResourceType.Sand] -= 15;
+            Resources.Resources[ResourceType.Stone] -= 20;
+            Resources.Resources[ResourceType.Wood] -= 20;
+            Resources.Resources[ResourceType.Sand] -= 20;
             BonusArmyCount += 5;
         }
 

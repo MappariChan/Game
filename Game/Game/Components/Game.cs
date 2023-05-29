@@ -30,6 +30,39 @@ namespace Game.Components
 
         private string Mode { get; set; }
 
+        private void SectionClick(object sender, EventArgs e)
+        {
+            Hexagon hexagon = null;
+            if (sender is Panel)
+            {
+                hexagon = Field.GetField().Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)sender).First();
+            }
+            else
+            {
+                hexagon = Field.GetField().Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)((PictureBox)sender).Parent).First();
+            }
+            if (Mode == "ATACK")
+            {
+                if (hexagon.Neighbours.Count(sect => sect.Player == currentPlayer && sect.SectionTroops != null) > 0)
+                {
+                    tcs.TrySetResult(hexagon);
+                }
+                else {
+                    MessageBox.Show("You can't atack this section!\nTry to choose green section!");
+                }
+            }
+            else {
+                if (hexagon.Surface is Meadows)
+                {
+                    tcs.TrySetResult(hexagon);
+                }
+                else
+                {
+                    MessageBox.Show("You can build only on Meadows!\nTry to choose green section!");
+                }
+            }
+        }
+
         private async Task WaitForPlayerChooseAsync()
         {
             await tcs.Task;
@@ -41,18 +74,20 @@ namespace Game.Components
             tcs = new TaskCompletionSource<Hexagon>();
             tcsMode = new TaskCompletionSource<string>();
             int[][] sections = {
-                new int[]{1,1,1,1},
-                new int[]{1,1,1,1,1},
-                new int[]{1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1},
-                new int[]{1,1,1,1,1},
-                new int[]{1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1,1},
             };
 
             surfaceFactory = new ClassicSurfaceFactory();
 
-            Field.InitializeField(form, sections, tcs, surfaceFactory);
+            Field.InitializeField(form, sections, surfaceFactory, SectionClick);
 
             Players = new List<Player>();
             for (int i = 0; i < amountOfPlayers; i++)
@@ -173,10 +208,16 @@ namespace Game.Components
         {
             if (currentPlayer.HaveEnoughResourceToBuild())
             {
-                tcsMode.TrySetResult("BUILD");
+                if (currentPlayer.Territory.Count(sect => sect.Surface is Meadows) > 0)
+                {
+                    tcsMode.TrySetResult("BUILD");
+                }
+                else {
+                    MessageBox.Show("You haven`t meadows to build fortress!\nFirstly, try to find meadows!");
+                }
             }
             else {
-                MessageBox.Show("You haven't enough resource to build.\nYou need 50 stones, 25 wood, 15 sand to build!");
+                MessageBox.Show("You haven't enough resource to build.\nYou need 20 stones, 20 wood, 20 sand to build!");
             }
         }
 
@@ -222,7 +263,6 @@ namespace Game.Components
                             break;
                         }
                         tcs = new TaskCompletionSource<Hexagon>();
-                        Field.GetField().tcs = tcs;
                     }
                     else if (Mode == "BUILD")
                     { 
@@ -232,7 +272,6 @@ namespace Game.Components
                         player.ChooseSectionToBuild(selectedSection);
                         HidePotentialBuildings(player);
                         tcs = new TaskCompletionSource<Hexagon>();
-                        Field.GetField().tcs = tcs;
                     }
                 }
             }

@@ -28,7 +28,7 @@ namespace Game.Components
 
         private void setSurface(TypeOfSurfaces typeOfSurface, ISurfaceFactory surfaceFactory)
         {
-            int randomResourceAmount = new Random().Next(5, 11);
+            int randomResourceAmount = new Random().Next(1, 4);
             switch (typeOfSurface)
             {
                 case TypeOfSurfaces.Meadows:
@@ -84,6 +84,10 @@ namespace Game.Components
         {
             if (Player != null) { 
                 Player.Territory.Remove(this);
+                if (Building != null) {
+                    Player.BonusArmyCount -= 5;
+                    player.BonusArmyCount += 5;
+                }
             }
             Color = player.Color;
             IsSelected = true;

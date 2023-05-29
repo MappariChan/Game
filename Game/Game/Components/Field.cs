@@ -15,20 +15,20 @@ namespace Game.Components
         public Panel FieldUI { get; set; }
         private static Field? field;
         public List<Hexagon> Hexagons { get; set; }
-        public TaskCompletionSource<Hexagon> tcs { get; set; }
-        public static void SectionClick(object sender, EventArgs e)
-        {
-            Hexagon hexagon = null;
-            if (sender is Panel)
-            {
-                hexagon = field.Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)sender).First();
-            }
-            else 
-            {
-                hexagon = field.Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)((PictureBox)sender).Parent).First();
-            }
-            field.tcs.TrySetResult(hexagon);
-        }
+        public static Action<object, EventArgs> SectionClick { get; set; }
+        //public static void SectionClick(object sender, EventArgs e)
+        //{
+        //    Hexagon hexagon = null;
+        //    if (sender is Panel)
+        //    {
+        //        hexagon = field.Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)sender).First();
+        //    }
+        //    else
+        //    {
+        //        hexagon = field.Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)((PictureBox)sender).Parent).First();
+        //    }
+        //    field.tcs.TrySetResult(hexagon);
+        //}
 
         private void CreateNewSection(int x, int y, int hexagonWidth, int hexagonHeight, ISurfaceFactory surfaceFactory)
         {
@@ -42,8 +42,9 @@ namespace Game.Components
             Hexagons.Add(newSection);
         }
 
-        private Field(Form1 form, int[][] sections, ISurfaceFactory surfaceFactory)
+        private Field(Form1 form, int[][] sections, ISurfaceFactory surfaceFactory, Action<object, EventArgs> sectionClick)
         {
+            SectionClick = sectionClick;
             Hexagons = new List<Hexagon>();
             FieldUI = new Panel();
             FieldUI.ControlAdded += FieldUI_ControlAdded;
@@ -89,12 +90,11 @@ namespace Game.Components
             e.Control.BringToFront();
         }
 
-        public static void InitializeField(Form1 form, int[][] sections, TaskCompletionSource<Hexagon> tcs, ISurfaceFactory surfaceFactory)
+        public static void InitializeField(Form1 form, int[][] sections, ISurfaceFactory surfaceFactory, Action<object, EventArgs> sectionClick)
         {
             if (field == null)
             {
-                field = new Field(form, sections, surfaceFactory);
-                field.tcs = tcs;
+                field = new Field(form, sections, surfaceFactory, sectionClick);
             }
         }
 
