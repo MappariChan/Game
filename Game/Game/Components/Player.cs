@@ -20,8 +20,11 @@ namespace Game.Components
         public List<Troops> Army { get; set; }
         public int MaxArmyCount { get; set; }
 
+        public int BonusArmyCount { get; set; }
+
         public Player(PlayerColor color, Hexagon headquater) 
         {
+            BonusArmyCount = 0;
             MaxArmyCount = 5;
             Army = new List<Troops>() { new Troops(color, headquater) };
             Headquater = headquater;
@@ -41,6 +44,20 @@ namespace Game.Components
                     Resources.AddResource(resource.Type, resource.Amount);
                 }
             }
+        }
+
+        public bool HaveEnoughResourceToBuild()
+        {
+            return Resources.Resources[ResourceType.Stone] >= 50 && Resources.Resources[ResourceType.Wood] >= 25 && Resources.Resources[ResourceType.Sand] >= 15;
+        }
+
+        public void ChooseSectionToBuild(Hexagon section)
+        {
+            section.Building = new Building(section);
+            Resources.Resources[ResourceType.Stone] -= 50;
+            Resources.Resources[ResourceType.Wood] -= 25;
+            Resources.Resources[ResourceType.Sand] -= 15;
+            BonusArmyCount += 5;
         }
 
         public void ChooseSection (Hexagon section)
@@ -68,7 +85,8 @@ namespace Game.Components
         {
             var armyInHeadquater = Headquater.SectionTroops;
             int armyAmount = Army.Sum(troops => troops.Amount);
-            int armyToReborn = MaxArmyCount - armyAmount;
+            int totalArmyCount = MaxArmyCount + BonusArmyCount;
+            int armyToReborn = totalArmyCount - armyAmount;
             if (armyToReborn > 0)
             {
                 if (armyInHeadquater != null)

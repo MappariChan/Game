@@ -24,9 +24,11 @@ namespace Game.Components
         public Troops SectionTroops { get; set; }
         public Player Player { get; set; }
 
+        public Building Building { get; set; }
+
         private void setSurface(TypeOfSurfaces typeOfSurface, ISurfaceFactory surfaceFactory)
         {
-            int randomResourceAmount = new Random().Next(1, 4);
+            int randomResourceAmount = new Random().Next(5, 11);
             switch (typeOfSurface)
             {
                 case TypeOfSurfaces.Meadows:
@@ -61,6 +63,7 @@ namespace Game.Components
             TypeOfSurface = typeOfSurface;
             SectionTroops = null;
             Player = null;
+            Building = null;
         }
 
         public void AddNeigbourIfNeighbour(Hexagon potentialNeighbour)
@@ -96,6 +99,11 @@ namespace Game.Components
         public void HidePotenitalMove()
         {
             SectionUI.ChangeSectionColor(PlayerColor.None);
+        }
+
+        public void HidePotentialBuilding()
+        {
+            SectionUI.ChangeSectionColor(Player.Color);
         }
 
         public void Unregister() {

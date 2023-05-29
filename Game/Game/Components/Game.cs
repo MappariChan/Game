@@ -7,6 +7,7 @@ using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Game.Components.ClassicSurfaces;
 using Game.Components.Resources;
 
 namespace Game.Components
@@ -15,13 +16,19 @@ namespace Game.Components
     {
         public List<Player> Players { get; set; }
 
+        private Player currentPlayer { get; set; }
+
         private TaskCompletionSource<Hexagon> tcs;
+
+        private TaskCompletionSource<string> tcsMode;
 
         public ISurfaceFactory surfaceFactory;
 
         public bool IsOver { get; set; }
 
         public Form1 Form { get; set; }
+
+        private string Mode { get; set; }
 
         private async Task WaitForPlayerChooseAsync()
         {
@@ -30,11 +37,17 @@ namespace Game.Components
 
         public Game(Form1 form, int amountOfPlayers) 
         {
-            tcs = new TaskCompletionSource<Hexagon>(); 
+            Mode = "ATACK";
+            tcs = new TaskCompletionSource<Hexagon>();
+            tcsMode = new TaskCompletionSource<string>();
             int[][] sections = {
-                new int[]{1,},
-                new int[]{1,1,},
-                new int[]{1,},
+                new int[]{1,1,1,1},
+                new int[]{1,1,1,1,1},
+                new int[]{1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1},
+                new int[]{1,1,1,1,1},
+                new int[]{1,1,1,1},
             };
 
             surfaceFactory = new ClassicSurfaceFactory();
@@ -92,6 +105,22 @@ namespace Game.Components
             }
         }
 
+        public void ShowPotentialBuildings(Player player)
+        {
+            foreach (var section in player.Territory.Where(ter => ter.Surface is Meadows))
+            {
+                section.ShowPotenitalMove();
+            }
+        }
+
+        public void HidePotentialBuildings(Player player)
+        {
+            foreach (var section in player.Territory.Where(ter => ter.Surface is Meadows))
+            {
+                section.HidePotentialBuilding();
+            }
+        }
+
         public void ShowPlayerResources(Player player)
         {
             var searchedControlls = Form.Controls.Find("Info", true);
@@ -100,6 +129,7 @@ namespace Game.Components
             {
                 panel = new Panel();
                 panel.Name = "Info";
+                panel.Size = new Size(100, 300);
                 Form.Controls.Add(panel);
             }
             else {
@@ -118,6 +148,41 @@ namespace Game.Components
                 panel.Controls.Add(label);
                 top += 20;
             }
+            var actionPanel = new Panel();
+            actionPanel.Height = 150;
+            actionPanel.Location = new Point(0, top + 40);
+            var actionLabel = new Label();
+            actionLabel.Text = "Modes";
+            var atackButton = new Button();
+            atackButton.Click += AtackButton_Click;
+            atackButton.Text = "Atack";
+            atackButton.Location = new Point(0, 40);
+            atackButton.Height = 40;
+            var buildButton = new Button();
+            buildButton.Click += BuildButton_Click;
+            buildButton.Text = "Build";
+            buildButton.Location = new Point(0, 80);
+            buildButton.Height = 40;
+            actionPanel.Controls.Add(actionLabel);
+            actionPanel.Controls.Add(atackButton);
+            actionPanel.Controls.Add(buildButton);
+            panel.Controls.Add(actionPanel);
+        }
+
+        private void BuildButton_Click(object? sender, EventArgs e)
+        {
+            if (currentPlayer.HaveEnoughResourceToBuild())
+            {
+                tcsMode.TrySetResult("BUILD");
+            }
+            else {
+                MessageBox.Show("You haven't enough resource to build.\nYou need 50 stones, 25 wood, 15 sand to build!");
+            }
+        }
+
+        private void AtackButton_Click(object? sender, EventArgs e)
+        {
+            tcsMode.TrySetResult("ATACK");
         }
 
         public async void Start() 
@@ -126,30 +191,49 @@ namespace Game.Components
             {
                 foreach (var player in Players)
                 {
+                    currentPlayer = player;
                     if (player == null) continue;
                     player.AddResources();
                     player.RebornDeathArmy();
                     ShowPlayerResources(player);
-                    ShowPotentialMoves(player);
-                    await WaitForPlayerChooseAsync();
-                    HidePotentialMoves(player);
-                    var selectedSection = tcs.Task.Result;
-                    player.ChooseSection(selectedSection);
-                    foreach (var playerCheck in Players) {
-                        if (playerCheck.IsDead()) { 
-                            playerCheck.Death();
-                            int index = Players.IndexOf(playerCheck);
-                            Players[index] = null;
+                    MessageBox.Show("Choose mode");
+                    Mode = await tcsMode.Task;
+                    tcsMode = new TaskCompletionSource<string> ();
+                    if (Mode == "ATACK")
+                    {
+                        ShowPotentialMoves(player);
+                        await WaitForPlayerChooseAsync();
+                        HidePotentialMoves(player);
+                        var selectedSection = tcs.Task.Result;
+                        player.ChooseSection(selectedSection);
+                        foreach (var playerCheck in Players)
+                        {
+                            if (playerCheck.IsDead())
+                            {
+                                playerCheck.Death();
+                                int index = Players.IndexOf(playerCheck);
+                                Players[index] = null;
+                                break;
+                            }
+                        }
+                        if ((double)player.Territory.Count / Field.GetField().Hexagons.Count > 0.7 || Players.Where(playerCheck => playerCheck != null).Count() == 1)
+                        {
+                            IsOver = true;
                             break;
                         }
+                        tcs = new TaskCompletionSource<Hexagon>();
+                        Field.GetField().tcs = tcs;
                     }
-                    if ((double)player.Territory.Count / Field.GetField().Hexagons.Count > 0.7 || Players.Where(playerCheck => playerCheck != null).Count() == 1)
-                    {
-                        IsOver = true;
-                        break;
+                    else if (Mode == "BUILD")
+                    { 
+                        ShowPotentialBuildings(player);
+                        await WaitForPlayerChooseAsync();
+                        var selectedSection = tcs.Task.Result;
+                        player.ChooseSectionToBuild(selectedSection);
+                        HidePotentialBuildings(player);
+                        tcs = new TaskCompletionSource<Hexagon>();
+                        Field.GetField().tcs = tcs;
                     }
-                    tcs = new TaskCompletionSource<Hexagon>();
-                    Field.GetField().tcs = tcs;
                 }
             }
             MessageBox.Show("End");

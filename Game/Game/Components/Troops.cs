@@ -52,7 +52,9 @@ namespace Game.Components
                 BackColor = Color.Transparent,
                 Height = 40,
                 Font = new Font(l1.Font.FontFamily, 14f, FontStyle.Bold),
-                Location = new Point(TroopsImage.Size.Width - 20, TroopsImage.Size.Height - 30)
+                Width = TroopsImage.Size.Width,
+                Location = new Point(0, TroopsImage.Size.Height - 30),
+                RightToLeft = RightToLeft.Yes
             });
             sectionUI.Controls.Add(TroopsImage);
             TroopsImage.BackColor = Color.Transparent;
@@ -124,7 +126,9 @@ namespace Game.Components
             else {
                 Remove(section);
                 Remove(Section);
-                player.Army.Add(new Troops(player.Color, Section, Amount - amount));
+                if(amount < Amount) { 
+                    player.Army.Add(new Troops(player.Color, Section, Amount - amount));
+                }
             }
         }
 
@@ -145,6 +149,20 @@ namespace Game.Components
             }
             else
             {
+                if (section.Player == player) {
+                    section.SectionTroops.Amount += amount;
+                    section.SectionTroops.TroopsImage.Controls[0].Text = section.SectionTroops.Amount.ToString();
+                    if (amount == Amount)
+                    {   
+                        Remove(Section);
+                    }
+                    else 
+                    {
+                        Amount -= amount;
+                        TroopsImage.Controls[0].Text = Amount.ToString();
+                    }
+                    return;
+                }
                 Atack(section, player, amount);
             }
         }
