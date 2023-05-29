@@ -21,6 +21,7 @@ namespace Game.Components
         public int MaxArmyCount { get; set; }
 
         public int BonusArmyCount { get; set; }
+        public bool IsAlive { get ; set; }
 
         public Player(PlayerColor color, Hexagon headquater) 
         {
@@ -33,6 +34,7 @@ namespace Game.Components
             Resources = new PlayerResources();
             headquater.SelectBy(this);
             //Headquater.SelectBy(this, Army);
+            IsAlive = true;
         }
 
         public void AddResources() {
@@ -106,6 +108,7 @@ namespace Game.Components
         }
 
         public void Death() {
+            IsAlive = false;
             foreach (var troop in Army) { 
                 troop.Unregister();
             }

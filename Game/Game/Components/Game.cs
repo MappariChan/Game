@@ -74,15 +74,9 @@ namespace Game.Components
             tcs = new TaskCompletionSource<Hexagon>();
             tcsMode = new TaskCompletionSource<string>();
             int[][] sections = {
-                new int[]{1,1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1,1,1},
-                new int[]{1,1,1,1,1,1,1,1},
+                new int[]{1, },
+                new int[]{1, 1},
+                new int[]{1, },
             };
 
             surfaceFactory = new ClassicSurfaceFactory();
@@ -233,7 +227,7 @@ namespace Game.Components
                 foreach (var player in Players)
                 {
                     currentPlayer = player;
-                    if (player == null) continue;
+                    if (!player.IsAlive) continue;
                     player.AddResources();
                     player.RebornDeathArmy();
                     ShowPlayerResources(player);
@@ -252,8 +246,6 @@ namespace Game.Components
                             if (playerCheck.IsDead())
                             {
                                 playerCheck.Death();
-                                int index = Players.IndexOf(playerCheck);
-                                Players[index] = null;
                                 break;
                             }
                         }
