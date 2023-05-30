@@ -14,7 +14,7 @@ namespace Game.Components
     {
         public PlayerColor Color { get; set; }
         public Hexagon Headquater { get; set; }
-        public List<Hexagon> Territory { get; set; }
+        public List<BaseResourceDecorator> Territory { get; set; }
 
         public PlayerResources Resources { get; set; }
         public List<Troops> Army { get; set; }
@@ -25,11 +25,10 @@ namespace Game.Components
 
         public Player(PlayerColor color, Hexagon headquater) 
         {
-            BonusArmyCount = 0;
             MaxArmyCount = 5;
             Army = new List<Troops>() { new Troops(color, headquater) };
             Headquater = headquater;
-            Territory = new List<Hexagon>() { Headquater };
+            Territory = new List<BaseResourceDecorator>() { new BaseResourceDecorator(Headquater) };
             Color = color;
             Resources = new PlayerResources();
             headquater.SelectBy(this);
@@ -40,26 +39,24 @@ namespace Game.Components
         public void AddResources() {
             foreach (var section in Territory)
             {
-                var resource = section.Resource;
-                if (resource != null)
-                {
-                    Resources.AddResource(resource.Type, resource.Amount);
-                }
+                section.AddResource(this);
             }
         }
 
         public bool HaveEnoughResourceToBuild()
         {
-            return Resources.Resources[ResourceType.Stone] >= 20 && Resources.Resources[ResourceType.Wood] >= 20 && Resources.Resources[ResourceType.Sand] >= 20;
+            return Resources.Resources[ResourceType.Stone] >= 5 && Resources.Resources[ResourceType.Wood] >= 5 && Resources.Resources[ResourceType.Sand] >= 5;
         }
 
         public void ChooseSectionToBuild(Hexagon section)
         {
             section.Building = new Building(section);
-            Resources.Resources[ResourceType.Stone] -= 20;
-            Resources.Resources[ResourceType.Wood] -= 20;
-            Resources.Resources[ResourceType.Sand] -= 20;
-            BonusArmyCount += 5;
+            Territory.Remove(Territory.Find(sect => sect.resourceService == section));
+            var sectionWithBuilding = new ArmyResourceDecorator(section);
+            Territory.Add(sectionWithBuilding);
+            Resources.Resources[ResourceType.Stone] -= 5;
+            Resources.Resources[ResourceType.Wood] -= 5;
+            Resources.Resources[ResourceType.Sand] -= 5;
         }
 
         public void ChooseSection (Hexagon section)
@@ -87,7 +84,7 @@ namespace Game.Components
         {
             var armyInHeadquater = Headquater.SectionTroops;
             int armyAmount = Army.Sum(troops => ((Troops)troops).Amount);
-            int totalArmyCount = MaxArmyCount + BonusArmyCount;
+            int totalArmyCount = MaxArmyCount;
             int armyToReborn = totalArmyCount - armyAmount;
             if (armyToReborn > 0)
             {
@@ -114,7 +111,7 @@ namespace Game.Components
             }
             Army = null;
             foreach (var section in Territory) { 
-                section.Unregister();
+                ((Hexagon)section.resourceService).Unregister();
             }
             Territory = null;
         }

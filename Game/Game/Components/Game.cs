@@ -123,9 +123,9 @@ namespace Game.Components
         {
             foreach (var territorySection in player.Territory)
             {
-                if (territorySection.SectionTroops != null)
+                if (((Hexagon)territorySection.resourceService).SectionTroops != null)
                 {
-                    var notSelectedNeighbours = territorySection.Neighbours.Where(sec => sec.IsSelected == false).ToList();
+                    var notSelectedNeighbours = ((Hexagon)territorySection.resourceService).Neighbours.Where(sec => sec.IsSelected == false).ToList();
                     foreach (var hexagon in notSelectedNeighbours)
                     {
                         hexagon.ShowPotenitalMove();
@@ -138,7 +138,7 @@ namespace Game.Components
         {
             foreach (var territorySection in player.Territory)
             {
-                var notSelectedNeighbours = territorySection.Neighbours.Where(sec => sec.IsSelected == false).ToList();
+                var notSelectedNeighbours = ((Hexagon)territorySection.resourceService).Neighbours.Where(sec => sec.IsSelected == false).ToList();
                 foreach (var hexagon in notSelectedNeighbours)
                 {
                     hexagon.HidePotenitalMove();
@@ -148,17 +148,17 @@ namespace Game.Components
 
         public void ShowPotentialBuildings(Player player)
         {
-            foreach (var section in player.Territory.Where(ter => ter.Surface is Meadows))
+            foreach (var section in player.Territory.Where(ter => ((Hexagon)ter.resourceService).Surface is Meadows))
             {
-                section.ShowPotenitalMove();
+                ((Hexagon)section.resourceService).ShowPotenitalMove();
             }
         }
 
         public void HidePotentialBuildings(Player player)
         {
-            foreach (var section in player.Territory.Where(ter => ter.Surface is Meadows))
+            foreach (var section in player.Territory.Where(ter => ((Hexagon)ter.resourceService).Surface is Meadows))
             {
-                section.HidePotentialBuilding();
+                ((Hexagon)section.resourceService).HidePotentialBuilding();
             }
         }
 
@@ -214,7 +214,7 @@ namespace Game.Components
         {
             if (currentPlayer.HaveEnoughResourceToBuild())
             {
-                if (currentPlayer.Territory.Count(sect => sect.Surface is Meadows) > 0)
+                if (currentPlayer.Territory.Count(sect =>   ((Hexagon)sect.resourceService).Surface is Meadows) > 0)
                 {
                     tcsMode.TrySetResult("BUILD");
                 }
@@ -223,7 +223,7 @@ namespace Game.Components
                 }
             }
             else {
-                MessageBox.Show("You haven't enough resource to build.\nYou need 20 stones, 20 wood, 20 sand to build!");
+                MessageBox.Show("You haven't enough resource to build.\nYou need 5 stones, 5 wood, 5 sand to build!");
             }
         }
 

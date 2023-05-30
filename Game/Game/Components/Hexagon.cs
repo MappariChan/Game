@@ -11,7 +11,7 @@ using Game.Components.Resources;
 
 namespace Game.Components
 {
-    public class Hexagon
+    public class Hexagon : IResourceService
     {
         public HexagonUI SectionUI { get; set; }
         public List<Hexagon> Neighbours { get; set; }
@@ -49,10 +49,18 @@ namespace Game.Components
             }
         }
 
+        public void AddResource(Player player)
+        {
+            if (Resource != null)
+            {
+                player.Resources.AddResource(Resource.Type, Resource.Amount);
+            }
+        }
+
         public void SelectBy(Player player)
         {
             if (Player != null) { 
-                Player.Territory.Remove(this);
+                Player.Territory.Remove(Player.Territory.Find(sect => sect.resourceService == this));
                 if (Building != null) {
                     Player.BonusArmyCount -= 5;
                     player.BonusArmyCount += 5;

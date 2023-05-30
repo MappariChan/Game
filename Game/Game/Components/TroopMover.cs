@@ -66,7 +66,7 @@ namespace Game.Components
                     Remove(troops.Section);
                     player.Army.Add(new Troops(player.Color, section, newAmount));
                 }
-                player.Territory.Add(section);
+                player.Territory.Add(new BaseResourceDecorator(section));
                 section.SelectBy(player);
             }
             else
@@ -92,7 +92,7 @@ namespace Game.Components
                 {
                     MoveAll(troops, section, player);
                 }
-                player.Territory.Add(section);
+                player.Territory.Add(new BaseResourceDecorator(section));
                 section.SelectBy(player);
             }
             else

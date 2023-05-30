@@ -15,10 +15,15 @@ namespace Game.Components
 {
     public class Troops{ 
         public PictureBox TroopsImage { get; set; }
-        public int Amount { get; set; }
+        public int Amount { get; set; } = 0;
         public Hexagon Section { get; set; }
-        public Troops(PlayerColor color, Hexagon section) 
+        public Troops(PlayerColor color, Hexagon section)
         {
+            if (section.SectionTroops != null)
+            {
+                Amount += section.SectionTroops.Amount;
+                Remove(section);
+            }
             Section = section;
             section.SectionTroops = this;
             var sectionUI = section.SectionUI.PictureBox;
@@ -43,7 +48,7 @@ namespace Game.Components
                     TroopsImage.Image = Image.FromFile("../../../Images/KnightOnTheHorse/Purple.png");
                     break;
             }
-            Amount = 5;
+            Amount += 5;
             System.Windows.Forms.Label l1 = new System.Windows.Forms.Label();
             TroopsImage.Controls.Add(new System.Windows.Forms.Label()
             {
@@ -63,7 +68,7 @@ namespace Game.Components
 
         public Troops(PlayerColor color, Hexagon section, int amount):this(color, section)
         {
-            Amount = amount;
+            Amount += amount - 5;
             TroopsImage.Controls[0].Text = Amount.ToString();
         }
 
@@ -120,7 +125,7 @@ namespace Game.Components
                     Remove(Section);
                     player.Army.Add(new Troops(player.Color, section, newAmount));
                 }
-                player.Territory.Add(section);
+                player.Territory.Add(new BaseResourceDecorator(section));
                 section.SelectBy(player);
             }
             else {
