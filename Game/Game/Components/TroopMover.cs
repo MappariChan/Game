@@ -66,7 +66,14 @@ namespace Game.Components
                     Remove(troops.Section);
                     player.Army.Add(new Troops(player.Color, section, newAmount));
                 }
-                player.Territory.Add(new BaseResourceDecorator(section));
+                if (section.Building != null)
+                {
+                    player.Territory.Add(new ArmyResourceDecorator(section));
+                }
+                else
+                {
+                    player.Territory.Add(new BaseResourceDecorator(section));
+                }
                 section.SelectBy(player);
             }
             else
@@ -92,7 +99,14 @@ namespace Game.Components
                 {
                     MoveAll(troops, section, player);
                 }
-                player.Territory.Add(new BaseResourceDecorator(section));
+                if (section.Building != null)
+                {
+                    player.Territory.Add(new ArmyResourceDecorator(section));
+                }
+                else
+                {
+                    player.Territory.Add(new BaseResourceDecorator(section));
+                }
                 section.SelectBy(player);
             }
             else

@@ -59,24 +59,10 @@ namespace Game.Components
             Resources.Resources[ResourceType.Sand] -= 5;
         }
 
-        public void ChooseSection (Hexagon section)
+        public void ChooseSection (Hexagon section, int amount)
         {
-            List<Troops> armyThatCanMove = null;
-            int result = 0;
-            do
-            {   
-                using (ModalFormForMove modalForm = new ModalFormForMove())
-                {
-                    if (modalForm.ShowDialog() == DialogResult.OK)
-                    {
-                        result = modalForm.Result;
-                        // Use the result as needed
-                        MessageBox.Show("Result: " + result.ToString());
-                    }
-                }
-                armyThatCanMove = Army.Where(troops => troops.Section.Neighbours.Contains(section) && troops.Amount >= result).ToList();
-            } while (armyThatCanMove.Count == 0);
-            armyThatCanMove[0].Move(section, this, result);
+            List<Troops> armyThatCanMove = Army.Where(troops => troops.Section.Neighbours.Contains(section) && troops.Amount >= amount).ToList();
+            armyThatCanMove[0].Move(section, this, amount);
             
         }
 
@@ -111,7 +97,7 @@ namespace Game.Components
             }
             Army = null;
             foreach (var section in Territory) { 
-                ((Hexagon)section.resourceService).Unregister();
+                ((Hexagon)((BaseResourceDecorator)section).resourceService).Unregister();
             }
             Territory = null;
         }

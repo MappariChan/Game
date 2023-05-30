@@ -85,7 +85,7 @@ namespace Game.Components
             int fieldHeight = hexagonSectionHeight + (sections.Length - 1) * hexagonSectionHeight * 3/4;
 
             FieldUI.Size = new Size(fieldWidth, fieldHeight);
-            FieldUI.Location = new Point(100, 0);
+            FieldUI.Location = new Point(200, 0);
             FieldUI.BackColor = Color.FromArgb(255,48,48,48);
             
             form.Controls.Add(FieldUI);

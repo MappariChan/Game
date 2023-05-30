@@ -24,11 +24,15 @@ namespace Game.Components
 
         private ISectionClickService sectionClickService;
 
+        private ActionStrategy actionStrategy;
+
         public bool IsOver { get; set; }
 
         public Form1 Form { get; set; }
 
         private string Mode { get; set; }
+
+        private TextBoxLogger textBoxLogger;
 
         private Player getCurrentPlayer()
         { 
@@ -75,9 +79,10 @@ namespace Game.Components
         //    }
         //}
 
-            public Game(Form1 form, int amountOfPlayers) 
+        public Game(Form1 form, int amountOfPlayers) 
         {
             Mode = "ATACK";
+            textBoxLogger = new TextBoxLogger(form);
             tcsMode = new TaskCompletionSource<string>();
             int[][] sections = {
                 new int[]{1,1,1,1},
@@ -117,49 +122,6 @@ namespace Game.Components
             Form = form;
 
             IsOver = false;
-        }
-
-        public void ShowPotentialMoves(Player player)
-        {
-            foreach (var territorySection in player.Territory)
-            {
-                if (((Hexagon)territorySection.resourceService).SectionTroops != null)
-                {
-                    var notSelectedNeighbours = ((Hexagon)territorySection.resourceService).Neighbours.Where(sec => sec.IsSelected == false).ToList();
-                    foreach (var hexagon in notSelectedNeighbours)
-                    {
-                        hexagon.ShowPotenitalMove();
-                    }
-                }
-            }
-        }
-
-        public void HidePotentialMoves(Player player)
-        {
-            foreach (var territorySection in player.Territory)
-            {
-                var notSelectedNeighbours = ((Hexagon)territorySection.resourceService).Neighbours.Where(sec => sec.IsSelected == false).ToList();
-                foreach (var hexagon in notSelectedNeighbours)
-                {
-                    hexagon.HidePotenitalMove();
-                }
-            }
-        }
-
-        public void ShowPotentialBuildings(Player player)
-        {
-            foreach (var section in player.Territory.Where(ter => ((Hexagon)ter.resourceService).Surface is Meadows))
-            {
-                ((Hexagon)section.resourceService).ShowPotenitalMove();
-            }
-        }
-
-        public void HidePotentialBuildings(Player player)
-        {
-            foreach (var section in player.Territory.Where(ter => ((Hexagon)ter.resourceService).Surface is Meadows))
-            {
-                ((Hexagon)section.resourceService).HidePotentialBuilding();
-            }
         }
 
         public void ShowPlayerResources(Player player)
@@ -248,30 +210,26 @@ namespace Game.Components
                     tcsMode = new TaskCompletionSource<string> ();
                     if (Mode == "ATACK")
                     {
-                        ShowPotentialMoves(player);
-                        var result = await ((SectionClickProxy)sectionClickService).Tcs.Task;
-                        HidePotentialMoves(player);
-                        player.ChooseSection(result);
-                        foreach (var playerCheck in Players)
-                        {
-                            if (playerCheck.IsAlive != false && playerCheck.IsDead())
-                            {
-                                playerCheck.Death();
-                                break;
-                            }
-                        }
-                        if ((double)player.Territory.Count / Field.GetField().Hexagons.Count > 0.7 || Players.Where(playerCheck => playerCheck != null).Count() == 1)
-                        {
-                            IsOver = true;
-                            break;
-                        }
+                        actionStrategy = new Move(textBoxLogger);
+                        
                     }
                     else if (Mode == "BUILD")
                     { 
-                        ShowPotentialBuildings(player);
-                        var result = await ((SectionClickProxy)sectionClickService).Tcs.Task;
-                        player.ChooseSectionToBuild(result);
-                        HidePotentialBuildings(player);
+                        actionStrategy= new Build(textBoxLogger);
+                    }
+                    await actionStrategy.Action(player, sectionClickService);
+                    foreach (var playerCheck in Players)
+                    {
+                        if (playerCheck.IsAlive != false && playerCheck.IsDead())
+                        {
+                            playerCheck.Death();
+                            break;
+                        }
+                    }
+                    if ((double)player.Territory.Count / Field.GetField().Hexagons.Count > 0.7 || Players.Where(playerCheck => playerCheck != null).Count() == 1)
+                    {
+                        IsOver = true;
+                        break;
                     }
                 }
             }
