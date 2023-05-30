@@ -18,17 +18,20 @@ namespace Game.UI
         public PictureBox PictureBox { get; set; }
         public PictureBox Clouds { get; set; }
 
-        public HexagonUI(Panel container, int x, int y, int width, int height, Image SurfaceImage) {
+        public HexagonUI(Panel container, Point location, Size size, Image SurfaceImage) {
             Section = new Panel();
 
             Section.Click += (sender, e) => { Field.SectionClick(sender, e); };
 
-            Section.Size = new Size(width, height);
-            Section.Location = new Point(x, y);
+            Section.Size = size;
+            Section.Location = location;
 
             Section.BackColor = System.Drawing.Color.Black;
 
             var panelRegion = new Region();
+
+            int height = size.Height;
+            int width = size.Width;
 
             var hexPath = new GraphicsPath();
             hexPath.AddPolygon(new[] {

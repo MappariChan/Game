@@ -86,7 +86,7 @@ namespace Game.Components
         public void RebornDeathArmy()
         {
             var armyInHeadquater = Headquater.SectionTroops;
-            int armyAmount = Army.Sum(troops => troops.Amount);
+            int armyAmount = Army.Sum(troops => ((Troops)troops).Amount);
             int totalArmyCount = MaxArmyCount + BonusArmyCount;
             int armyToReborn = totalArmyCount - armyAmount;
             if (armyToReborn > 0)
@@ -110,7 +110,7 @@ namespace Game.Components
         public void Death() {
             IsAlive = false;
             foreach (var troop in Army) { 
-                troop.Unregister();
+                ((Troops)troop).Unregister();
             }
             Army = null;
             foreach (var section in Territory) { 

@@ -13,7 +13,7 @@ using static System.Collections.Specialized.BitVector32;
 
 namespace Game.Components
 {
-    public class Troops { 
+    public class Troops{ 
         public PictureBox TroopsImage { get; set; }
         public int Amount { get; set; }
         public Hexagon Section { get; set; }

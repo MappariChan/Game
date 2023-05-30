@@ -16,6 +16,8 @@ namespace Game.Components
         private static Field? field;
         public List<Hexagon> Hexagons { get; set; }
         public static Action<object, EventArgs> SectionClick { get; set; }
+        private HexagonBuilder Builder { get; set; }
+        private Director Director { get; set; }
         //public static void SectionClick(object sender, EventArgs e)
         //{
         //    Hexagon hexagon = null;
@@ -34,7 +36,9 @@ namespace Game.Components
         {
             int max = Enum.GetValues(typeof(TypeOfSurfaces)).Length;
             TypeOfSurfaces randomSurface = (TypeOfSurfaces)new Random().Next(0, max);
-            var newSection = new Hexagon(FieldUI, x, y, hexagonWidth, hexagonHeight, randomSurface, surfaceFactory);
+            
+            Director.ConstructHexagon(Builder, randomSurface, surfaceFactory, FieldUI, new Point(x, y), new Size(hexagonWidth, hexagonHeight));
+            var newSection = Builder.GetResult();
             foreach (var hexagon in Hexagons)
             {
                 hexagon.AddNeigbourIfNeighbour(newSection);
@@ -44,6 +48,8 @@ namespace Game.Components
 
         private Field(Form1 form, int[][] sections, ISurfaceFactory surfaceFactory, Action<object, EventArgs> sectionClick)
         {
+            Director = new Director();
+            Builder = new HexagonBuilder();
             SectionClick = sectionClick;
             Hexagons = new List<Hexagon>();
             FieldUI = new Panel();

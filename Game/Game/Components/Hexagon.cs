@@ -26,44 +26,13 @@ namespace Game.Components
 
         public Building Building { get; set; }
 
-        private void setSurface(TypeOfSurfaces typeOfSurface, ISurfaceFactory surfaceFactory)
-        {
-            int randomResourceAmount = new Random().Next(1, 4);
-            switch (typeOfSurface)
-            {
-                case TypeOfSurfaces.Meadows:
-                    Surface = surfaceFactory.CreateMeadows();
-                    Resource = null;
-                    break;
-                case TypeOfSurfaces.Desert:
-                    Surface = surfaceFactory.CreateDesert();
-                    Resource = new Resource(ResourceType.Sand, randomResourceAmount);
-                    break;
-                case TypeOfSurfaces.Mountains:
-                    Surface = surfaceFactory.CreateMountains();
-                    Resource = new Resource(ResourceType.Stone, randomResourceAmount);
-                    break;
-                case TypeOfSurfaces.Swamp:
-                    Surface = surfaceFactory.CreateSwamp();
-                    break;
-                case TypeOfSurfaces.Forest:
-                    Surface = surfaceFactory.CreateForest();
-                    Resource = new Resource(ResourceType.Wood, randomResourceAmount);
-                    break;
-            }
-        }
-
-        public Hexagon(Panel container, int x, int y, int width, int height, TypeOfSurfaces typeOfSurface, ISurfaceFactory surfaceFactory)
-        {
-            setSurface(typeOfSurface, surfaceFactory);
-            SectionUI = new HexagonUI(container, x, y, width, height, Surface.SurfaceImage);
+        public Hexagon() {
             Neighbours = new List<Hexagon>();
             IsSelected = false;
-            Color = PlayerColor.None;
-            TypeOfSurface = typeOfSurface;
             SectionTroops = null;
             Player = null;
             Building = null;
+            Color = PlayerColor.None;
         }
 
         public void AddNeigbourIfNeighbour(Hexagon potentialNeighbour)
