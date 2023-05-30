@@ -134,37 +134,8 @@ namespace Game.Components
 
         public void Move(Hexagon section, Player player, int amount) 
         {
-            if (section.SectionTroops == null)
-            {
-                if (amount < Amount)
-                {
-                    MovePart(section, amount, player);
-                }
-                else
-                {
-                    MoveAll(section, player);
-                }
-                player.Territory.Add(section);
-                section.SelectBy(player);
-            }
-            else
-            {
-                if (section.Player == player) {
-                    section.SectionTroops.Amount += amount;
-                    section.SectionTroops.TroopsImage.Controls[0].Text = section.SectionTroops.Amount.ToString();
-                    if (amount == Amount)
-                    {   
-                        Remove(Section);
-                    }
-                    else 
-                    {
-                        Amount -= amount;
-                        TroopsImage.Controls[0].Text = Amount.ToString();
-                    }
-                    return;
-                }
-                Atack(section, player, amount);
-            }
+            var troopMover = TroopMover.GetInstance();
+            troopMover.Move(this, section, player, amount);
         }
     }
 }

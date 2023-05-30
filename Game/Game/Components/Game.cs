@@ -18,11 +18,11 @@ namespace Game.Components
 
         private Player currentPlayer { get; set; }
 
-        private TaskCompletionSource<Hexagon> tcs;
-
         private TaskCompletionSource<string> tcsMode;
 
         public ISurfaceFactory surfaceFactory;
+
+        private ISectionClickService sectionClickService;
 
         public bool IsOver { get; set; }
 
@@ -30,58 +30,70 @@ namespace Game.Components
 
         private string Mode { get; set; }
 
-        private void SectionClick(object sender, EventArgs e)
-        {
-            Hexagon hexagon = null;
-            if (sender is Panel)
-            {
-                hexagon = Field.GetField().Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)sender).First();
-            }
-            else
-            {
-                hexagon = Field.GetField().Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)((PictureBox)sender).Parent).First();
-            }
-            if (Mode == "ATACK")
-            {
-                if (hexagon.Neighbours.Count(sect => sect.Player == currentPlayer && sect.SectionTroops != null) > 0)
-                {
-                    tcs.TrySetResult(hexagon);
-                }
-                else {
-                    MessageBox.Show("You can't atack this section!\nTry to choose green section!");
-                }
-            }
-            else {
-                if (hexagon.Surface is Meadows)
-                {
-                    tcs.TrySetResult(hexagon);
-                }
-                else
-                {
-                    MessageBox.Show("You can build only on Meadows!\nTry to choose green section!");
-                }
-            }
+        private Player getCurrentPlayer()
+        { 
+            return currentPlayer;
         }
 
-        private async Task WaitForPlayerChooseAsync()
+        private string getCurrentMode()
         {
-            await tcs.Task;
+            return Mode;
         }
 
-        public Game(Form1 form, int amountOfPlayers) 
+        //private void SectionClick(object sender, EventArgs e)
+        //{
+        //    Hexagon hexagon = null;
+        //    if (sender is Panel)
+        //    {
+        //        hexagon = Field.GetField().Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)sender).First();
+        //    }
+        //    else
+        //    {
+        //        hexagon = Field.GetField().Hexagons.Where(hexagon => hexagon.SectionUI.Section == (Panel)((PictureBox)sender).Parent).First();
+        //    }
+        //    if (Mode == "ATACK")
+        //    {
+        //        if (hexagon.Neighbours.Count(sect => sect.Player == currentPlayer && sect.SectionTroops != null) > 0)
+        //        {
+        //            tcs.TrySetResult(hexagon);
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("You can't atack this section!\nTry to choose green section!");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (hexagon.Surface is Meadows)
+        //        {
+        //            tcs.TrySetResult(hexagon);
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("You can build only on Meadows!\nTry to choose green section!");
+        //        }
+        //    }
+        //}
+
+            public Game(Form1 form, int amountOfPlayers) 
         {
             Mode = "ATACK";
-            tcs = new TaskCompletionSource<Hexagon>();
             tcsMode = new TaskCompletionSource<string>();
             int[][] sections = {
-                new int[]{1, },
-                new int[]{1, 1},
-                new int[]{1, },
+                new int[]{1,1,1,1},
+                new int[]{1,1,1,1,1},
+                new int[]{1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1,1},
+                new int[]{1,1,1,1,1,1},
+                new int[]{1,1,1,1,1},
+                new int[]{1,1,1,1},
             };
 
             surfaceFactory = new ClassicSurfaceFactory();
 
-            Field.InitializeField(form, sections, surfaceFactory, SectionClick);
+            sectionClickService = new SectionClickProxy(getCurrentPlayer, getCurrentMode);
+
+            Field.InitializeField(form, sections, surfaceFactory, sectionClickService.Option);
 
             Players = new List<Player>();
             for (int i = 0; i < amountOfPlayers; i++)
@@ -237,13 +249,12 @@ namespace Game.Components
                     if (Mode == "ATACK")
                     {
                         ShowPotentialMoves(player);
-                        await WaitForPlayerChooseAsync();
+                        var result = await ((SectionClickProxy)sectionClickService).Tcs.Task;
                         HidePotentialMoves(player);
-                        var selectedSection = tcs.Task.Result;
-                        player.ChooseSection(selectedSection);
+                        player.ChooseSection(result);
                         foreach (var playerCheck in Players)
                         {
-                            if (playerCheck.IsDead())
+                            if (playerCheck.IsAlive != false && playerCheck.IsDead())
                             {
                                 playerCheck.Death();
                                 break;
@@ -254,16 +265,13 @@ namespace Game.Components
                             IsOver = true;
                             break;
                         }
-                        tcs = new TaskCompletionSource<Hexagon>();
                     }
                     else if (Mode == "BUILD")
                     { 
                         ShowPotentialBuildings(player);
-                        await WaitForPlayerChooseAsync();
-                        var selectedSection = tcs.Task.Result;
-                        player.ChooseSectionToBuild(selectedSection);
+                        var result = await ((SectionClickProxy)sectionClickService).Tcs.Task;
+                        player.ChooseSectionToBuild(result);
                         HidePotentialBuildings(player);
-                        tcs = new TaskCompletionSource<Hexagon>();
                     }
                 }
             }
