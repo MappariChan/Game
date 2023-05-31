@@ -8,6 +8,6 @@ namespace Game.Components.FantasySurfaces
 {
     public class DeadSwamp : ISurface
     {
-        public DeadSwamp() : base("") { }
+        public DeadSwamp() : base("../../../Images/fantasySwamp.png") { }
     }
 }

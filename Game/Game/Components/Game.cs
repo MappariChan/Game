@@ -80,7 +80,7 @@ namespace Game.Components
         //    }
         //}
 
-        public Game(Form1 form, int amountOfPlayers) 
+        public Game(Form1 form, int amountOfPlayers, string option) 
         {
             Mode = "ATACK";
             textBoxLogger = new TextBoxLogger(form);
@@ -95,7 +95,14 @@ namespace Game.Components
                 new int[]{1,1,1,1},
             };
 
-            surfaceFactory = new ClassicSurfaceFactory();
+            if (option == "classic")
+            {
+                surfaceFactory = new ClassicSurfaceFactory();
+            }
+            else
+            { 
+                surfaceFactory = new FantasySurfaceFactory();
+            }
 
             sectionClickService = new SectionClickProxy(getCurrentPlayer, getCurrentMode);
 

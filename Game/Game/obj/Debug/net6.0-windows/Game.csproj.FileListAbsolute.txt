@@ -16,3 +16,4 @@ D:\Game\Game\Game\obj\Debug\net6.0-windows\Game.pdb
 D:\Game\Game\Game\obj\Debug\net6.0-windows\Game.genruntimeconfig.cache
 D:\Game\Game\Game\obj\Debug\net6.0-windows\ref\Game.dll
 D:\Game\Game\Game\obj\Debug\net6.0-windows\Game.Components.ModalForms.ModalFormForMove.resources
+D:\Game\Game\Game\obj\Debug\net6.0-windows\Game.StartForm.resources

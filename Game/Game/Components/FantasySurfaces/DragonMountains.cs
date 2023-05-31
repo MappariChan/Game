@@ -8,6 +8,6 @@ namespace Game.Components.FantasySurfaces
 {
     public class DragonMountains : ISurface
     {
-        public DragonMountains() : base("") { }
+        public DragonMountains() : base("../../../Images/fantasyMountains.png") { }
     }
 }

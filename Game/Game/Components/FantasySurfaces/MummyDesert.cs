@@ -8,6 +8,6 @@ namespace Game.Components.FantasySurfaces
 {
     public class MummyDesert : ISurface
     {
-        public MummyDesert() : base("") { }
+        public MummyDesert() : base("../../../Images/fantasyDesert.png") { }
     }
 }

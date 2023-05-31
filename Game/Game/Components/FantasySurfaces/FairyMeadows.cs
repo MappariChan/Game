@@ -8,6 +8,6 @@ namespace Game.Components.FantasySurfaces
 {
     public class FairyMeadows : ISurface
     {
-        public FairyMeadows() : base("") { }
+        public FairyMeadows() : base("../../../Images/fantasyMeadows.jpg") { }
     }
 }

@@ -23,7 +23,7 @@ namespace Game
 
         private async void FormLoad(object sender, EventArgs e)
         {
-            Components.Game game = new Components.Game(this, 2);
+            Components.Game game = new Components.Game(this, StartForm.amountint, StartForm.option);
             await task.Task;
             game.Start();
         }

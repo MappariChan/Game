@@ -8,6 +8,6 @@ namespace Game.Components.FantasySurfaces
 {
     public class SpiderForest : ISurface
     {
-        public SpiderForest() : base("") { }
+        public SpiderForest() : base("../../../Images/fantasyForest.png") { }
     }
 }
