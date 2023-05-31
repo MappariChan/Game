@@ -63,7 +63,7 @@ namespace Game.Components
             });
             sectionUI.Controls.Add(TroopsImage);
             TroopsImage.BackColor = Color.Transparent;
-            
+            TroopsImage.BringToFront();
         }
 
         public Troops(PlayerColor color, Hexagon section, int amount):this(color, section)
@@ -71,18 +71,6 @@ namespace Game.Components
             Amount += amount - 5;
             TroopsImage.Controls[0].Text = Amount.ToString();
         }
-
-        private void MovePart(Hexagon section, int amount, Player player) {
-            player.Army.Add(new Troops(player.Color, section, amount));
-            Amount -= amount;
-            TroopsImage.Controls[0].Text = Amount.ToString();
-        }
-
-        private void MoveAll(Hexagon section, Player player) {
-            Remove(Section);
-            player.Army.Add(new Troops(player.Color, section, Amount));
-        }
-
         private void Remove(Hexagon section) {
             var sectionTroops = section.SectionTroops;
             section.Player.Army.Remove(sectionTroops);
@@ -93,48 +81,6 @@ namespace Game.Components
         public void Unregister() {
             Section.SectionUI.PictureBox.Controls.Remove(TroopsImage);
             Section = null;
-        }
-
-        private void Atack(Hexagon section, Player player, int amount)
-        {
-            int newAmount = amount - section.SectionTroops.Amount;
-            if (section.SectionTroops.Amount > amount)
-            {
-                section.SectionTroops.Amount -= amount;
-                section.SectionTroops.TroopsImage.Controls[0].Text = section.SectionTroops.Amount.ToString();
-                if (amount < Amount)
-                {
-                    Amount -= amount;
-                    TroopsImage.Controls[0].Text = Amount.ToString();
-                }
-                else {
-                    Remove(Section);
-                }
-            }
-            else if (section.SectionTroops.Amount < amount)
-            {
-                Remove(section);
-                if (Amount > amount)
-                {
-                    MovePart(section, amount, player);
-                    section.SectionTroops.Amount = newAmount;
-                    section.SectionTroops.TroopsImage.Controls[0].Text = newAmount.ToString();
-                }
-                else
-                {
-                    Remove(Section);
-                    player.Army.Add(new Troops(player.Color, section, newAmount));
-                }
-                player.Territory.Add(new BaseResourceDecorator(section));
-                section.SelectBy(player);
-            }
-            else {
-                Remove(section);
-                Remove(Section);
-                if(amount < Amount) { 
-                    player.Army.Add(new Troops(player.Color, Section, Amount - amount));
-                }
-            }
         }
 
         public void Move(Hexagon section, Player player, int amount) 

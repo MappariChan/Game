@@ -26,12 +26,14 @@ namespace Game.Components
         public Player(PlayerColor color, Hexagon headquater) 
         {
             MaxArmyCount = 5;
+            Color = color;
+            headquater.SelectHeadquaterBy(this);
             Army = new List<Troops>() { new Troops(color, headquater) };
             Headquater = headquater;
             Territory = new List<BaseResourceDecorator>() { new BaseResourceDecorator(Headquater) };
-            Color = color;
+            
             Resources = new PlayerResources();
-            headquater.SelectBy(this);
+            
             //Headquater.SelectBy(this, Army);
             IsAlive = true;
         }
@@ -63,7 +65,6 @@ namespace Game.Components
         {
             List<Troops> armyThatCanMove = Army.Where(troops => troops.Section.Neighbours.Contains(section) && troops.Amount >= amount).ToList();
             armyThatCanMove[0].Move(section, this, amount);
-            
         }
 
         public void RebornDeathArmy()
@@ -97,7 +98,7 @@ namespace Game.Components
             }
             Army = null;
             foreach (var section in Territory) { 
-                ((Hexagon)((BaseResourceDecorator)section).resourceService).Unregister();
+                ((Hexagon)section.resourceService).Unregister();
             }
             Territory = null;
         }

@@ -23,8 +23,11 @@ namespace Game.Components
         public Image SurfaceImage { get; set; }
         public Troops SectionTroops { get; set; }
         public Player Player { get; set; }
+        public bool IsHeadquater { get; set; }
 
         public Building Building { get; set; }
+
+        private HexagonState hexagonState;
 
         public Hexagon() {
             Neighbours = new List<Hexagon>();
@@ -33,6 +36,8 @@ namespace Game.Components
             Player = null;
             Building = null;
             Color = PlayerColor.None;
+            IsHeadquater = false;
+            hexagonState = new UnselectedHexagon(this);
         }
 
         public void AddNeigbourIfNeighbour(Hexagon potentialNeighbour)
@@ -51,10 +56,7 @@ namespace Game.Components
 
         public void AddResource(Player player)
         {
-            if (Resource != null)
-            {
-                player.Resources.AddResource(Resource.Type, Resource.Amount);
-            }
+            hexagonState.AddResources(player);
         }
 
         public void SelectBy(Player player)
@@ -70,6 +72,22 @@ namespace Game.Components
             IsSelected = true;
             SectionUI.ChangeSectionColor(player.Color);
             Player = player;
+            hexagonState = new SelectedHexagon(this);
+        }
+
+        public void SelectHeadquaterBy(Player player)
+        {
+            SelectBy(player);
+            IsHeadquater = true;
+            string playerColor = Enum.GetName(typeof(PlayerColor), player.Color);
+            PictureBox flag = new PictureBox();
+            flag.SizeMode = PictureBoxSizeMode.StretchImage;
+            flag.BackColor = System.Drawing.Color.Transparent;
+            flag.Image = Image.FromFile("../../../Images/Flags/" + playerColor + ".png");
+            int size = SectionUI.PictureBox.Width;
+            flag.Location = new Point(size / 5, size / 5);
+            flag.Size = new Size(size/5*3, size/5*3);
+            SectionUI.PictureBox.Controls.Add(flag);
         }
 
         public void ShowPotenitalMove()

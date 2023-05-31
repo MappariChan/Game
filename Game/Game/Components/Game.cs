@@ -43,6 +43,7 @@ namespace Game.Components
         {
             return Mode;
         }
+        private bool isModeSelected;
 
         //private void SectionClick(object sender, EventArgs e)
         //{
@@ -178,7 +179,11 @@ namespace Game.Components
             {
                 if (currentPlayer.Territory.Count(sect =>   ((Hexagon)sect.resourceService).Surface is Meadows) > 0)
                 {
-                    tcsMode.TrySetResult("BUILD");
+                    if (!isModeSelected)
+                    {
+                        tcsMode.TrySetResult("BUILD");
+                        isModeSelected = true;
+                    }
                 }
                 else {
                     MessageBox.Show("You haven`t meadows to build fortress!\nFirstly, try to find meadows!");
@@ -191,7 +196,11 @@ namespace Game.Components
 
         private void AtackButton_Click(object? sender, EventArgs e)
         {
-            tcsMode.TrySetResult("ATACK");
+            if (!isModeSelected)
+            {
+                tcsMode.TrySetResult("ATACK");
+                isModeSelected = true;
+            }
         }
 
         public async void Start() 
@@ -200,6 +209,7 @@ namespace Game.Components
             {
                 foreach (var player in Players)
                 {
+                    isModeSelected = false;
                     currentPlayer = player;
                     if (!player.IsAlive) continue;
                     player.AddResources();
@@ -226,7 +236,7 @@ namespace Game.Components
                             break;
                         }
                     }
-                    if ((double)player.Territory.Count / Field.GetField().Hexagons.Count > 0.7 || Players.Where(playerCheck => playerCheck != null).Count() == 1)
+                    if ((double)player.Territory.Count / Field.GetField().Hexagons.Count > 0.7 || Players.Where(playerCheck => playerCheck.IsAlive).Count() == 1)
                     {
                         IsOver = true;
                         break;
